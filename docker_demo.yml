@@ -1,0 +1,48 @@
+version: '3'
+services:
+  scanner:
+    image: zj1244/beholder_scanner:latest
+    container_name: beholder_scanner
+    restart: always
+    environment:
+      REDIS_IP: redis
+      REDIS_PORT: 6379
+      REDIS_PWD: ""
+      MONGO_IP: mongo
+      MONGO_PORT: 27017
+      MONGO_USER: ""
+      MONGO_PWD: ""
+    depends_on:
+      - redis
+      - mongo
+  web:
+    build: .
+    container_name: beholder_web
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      REDIS_IP: redis
+      REDIS_PORT: 6379
+      REDIS_PWD: ""
+      MONGO_IP: mongo
+      MONGO_PORT: 27017
+      MONGO_USER: ""
+      MONGO_PWD: ""
+    depends_on:
+      - redis
+      - mongo
+  redis:
+    image: redis:5.0.3
+    container_name: beholder_redis
+    restart: always
+    expose:
+      - "6379"
+  mongo:
+    image: mongo:3.6.15-xenial
+    container_name: beholder_mongo
+    restart: always
+    volumes:
+      - "/mongodb/db:/data/db"
+    expose:
+      - "27017"

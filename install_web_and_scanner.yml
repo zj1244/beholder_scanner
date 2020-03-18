@@ -1,0 +1,31 @@
+version: '3'
+services:
+  scanner:
+    image: zj1244/beholder_scanner:latest
+    restart: always
+    environment:
+      # 请修改以下redis和mongodb的配置
+      REDIS_IP: 192.168.47.168
+      REDIS_PORT: 6379
+      REDIS_PWD: pwd
+      MONGO_IP: 192.168.47.168
+      MONGO_PORT: 27017
+      MONGO_USER: scan
+      MONGO_PWD: 123456
+  web:
+    image: zj1244/beholder_web:latest
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      # 登陆用户名密码
+      ACCOUNT: "admin"
+      PASSWORD: "123456"
+      # 请修改以下redis和mongodb的配置
+      REDIS_IP: 192.168.47.168
+      REDIS_PORT: 6379
+      REDIS_PWD: pwd
+      MONGO_IP: 192.168.47.168
+      MONGO_PORT: 27017
+      MONGO_USER: scan
+      MONGO_PWD: 123456

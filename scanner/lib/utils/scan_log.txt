@@ -1,0 +1,10 @@
+[2020-02-21 Friday 15:17] [INFO] dddddd
+[2020-02-21 Friday 15:17] [INFO] 1
+[2020-02-21 Friday 15:17] [WARNING] 2
+[2020-02-21 Friday 15:17] [ERROR] 3
+[2020-02-21 Friday 15:17] [DEBUG] 4
+[2020-02-21 Friday 15:17] [ERROR] aa
+Traceback (most recent call last):
+  File "D:/dev/beholder/scanner/lib/utils/log.py", line 83, in <module>
+    xxx()
+NameError: name 'xxx' is not defined

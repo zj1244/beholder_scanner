@@ -1,0 +1,6 @@
+*.pyc
+*.log
+*.zip
+scanner/config.py
+scanner/setting.json
+.idea/

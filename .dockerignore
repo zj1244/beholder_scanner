@@ -1,0 +1,10 @@
+*.pyc
+*.log
+*DS_Store
+*.out
+*.env
+.git
+.idea/
+__pycache__/
+*.py[cod]
+.env
