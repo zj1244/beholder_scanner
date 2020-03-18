@@ -78,6 +78,14 @@ def get_ip_list(start_ip, end_ip):
     return ip_list
 
 
+def get_ip(ip="8.8.8.8", port=80):
+    csock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    csock.connect((ip, port))
+    (addr, port) = csock.getsockname()
+    csock.close()
+    return addr
+
+
 def str2dict(string):
     try:
         if type(string) == dict:
@@ -151,7 +159,7 @@ def diff_port():
                 for t in cron_task_running:
 
                     if not redis.get_key("scan_" + str(t["_id"])) and not redis.get_key(
-                            "ack_scan_" + str(t["_id"])):
+                                    "ack_scan_" + str(t["_id"])):
                         log.info("扫描结束")
                         mongo_task.update_one({"_id": t["_id"]},
                                               {"$set": {"task_status": "finish", "end_time": datetime.datetime.now()}})
@@ -458,5 +466,3 @@ def format_html(scan_time="", add_ips_count=0, add_ports_count=0, del_ips_count=
 
     """ % (scan_time, add_ips_count, add_ports_count, del_ips_count, add_ips_html, add_ports_html, del_ips_html)
     return html
-
-

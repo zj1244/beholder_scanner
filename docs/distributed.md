@@ -15,6 +15,7 @@ services:
   scanner:
     image: zj1244/beholder_scanner:latest
     restart: always
+    network_mode: "host"
     environment:
       # 请修改以下redis和mongodb的配置
       REDIS_IP: 192.168.47.168

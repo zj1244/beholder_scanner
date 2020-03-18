@@ -3,6 +3,7 @@ services:
   scanner:
     build: .
     restart: always
+    network_mode: "host"
     environment:
       # 请修改以下redis和mongodb的配置
       REDIS_IP: 192.168.47.168
