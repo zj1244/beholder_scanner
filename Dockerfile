@@ -6,10 +6,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN set -x \
     && apt-get update \
-    && apt-get install curl python-pip python-dev -y \
+    && apt-get install curl python-pip python-dev flex bison libssl-dev libpcap-dev -y \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /opt/beholder_scanner
-#RUN mkdir -p /opt/beholder_scanner
+
 COPY . /opt/beholder_scanner
 
 RUN set -x \
@@ -21,14 +21,6 @@ RUN set -x \
     && tar -xjf /tmp/nmap.tar.bz2 -C /tmp \
     && cd /tmp/nmap* \
     && ./configure \
-        --prefix=/usr \
-        --sysconfdir=/etc \
-        --mandir=/usr/share/man \
-        --infodir=/usr/share/info \
-        --without-zenmap \
-        --without-nmap-update \
-        --with-openssl=/usr/lib \
-        --with-liblua=/usr/include \
     && make \
     && make install \
 
