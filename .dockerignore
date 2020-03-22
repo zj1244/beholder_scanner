@@ -5,6 +5,8 @@
 *.env
 .git
 .idea/
+scanner/config.py
+scanner/setting.json
 __pycache__/
 *.py[cod]
 .env

@@ -1,4 +1,4 @@
-## Linux环境下安装指南（以下操作均在centos 7上进行）
+## Linux环境下安装scanner端指南（以下操作均在centos 7上进行）
 
 
 ### 1. 安装python依赖库
@@ -39,7 +39,7 @@ FIND_HOST = os.environ.get("FIND_HOST", 1)
 REDIS_IP = os.environ.get("REDIS_IP", "127.0.0.1")  # redis的ip
 REDIS_PORT = str(os.environ.get("REDIS_PORT", "6379"))  # redis的端口
 REDIS_PWD = os.environ.get("REDIS_PWD", "pwd")  # redis的连接密码
-VULSCAN_KEY = ""  # 用于后续扫描的队列，没后续扫描则保留为空
+VULSCAN_KEY = ""  # 用于后续扫描的队列，保持默认为空即可
 
 # db配置，需按照实际情况修改
 MONGO_IP = os.environ.get("MONGO_IP", "127.0.0.1")  # mongodb的ip

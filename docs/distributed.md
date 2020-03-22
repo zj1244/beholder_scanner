@@ -5,7 +5,7 @@
 
 ## 部署 beholder_web和beholder_scanner
 
-### 1. 构建镜像&&启动容器
+### 1. 构建镜像
 
 新建个install_web_and_scanner.yml文件，复制粘贴如下内容：
 
@@ -53,12 +53,12 @@ services:
 ### 3. 检查启动是否成功
 如果输出类似信息则启动成功，此时可访问[http://ip:8000](http://ip:8000)，输入install_web_and_scanner.yml里的用户名密码来登陆
 ```bash
-# docker logs beholder_web
+# docker logs $(docker ps | grep zj1244/beholder_web | awk '{print $1}')
 [2020-03-18 Wednesday 00:20] [INFO] Scheduler started
 [2020-03-18 Wednesday 00:20] [DEBUG] Looking for jobs to run
 [2020-03-18 Wednesday 00:20] [INFO]  * Running on http://0.0.0.0:8000/ (Press CTRL+C to quit)
 [2020-03-18 Wednesday 00:20] [DEBUG] Next wakeup is due at 2020-03-18 01:11:13.959033+08:00 (in 3019.861167 seconds)
-# docker logs beholder_scanner
+# docker logs $(docker ps | grep zj1244/beholder_scanner | awk '{print $1}')
 [2020-03-18 00:20:52,385] [INFO] 扫描开始
 ```
 
@@ -67,14 +67,13 @@ services:
 
 ## 部署单个 beholder_scanner
 
-在多个主机上重复部署beholder_scanner提高扫描速度。
+目的：在多台机器上重复部署beholder_scanner提高扫描速度。
 
 ### 1. 构建镜像&&启动容器
 
-使用 vi 新建一个名为docker-compose.yml的文件，文件内容如下：
+使用 vi 新建一个名为docker-compose.yml的文件，复制粘贴如下内容：
 
 ```
-# vi docker-compose.yml # 第一步，使用 vi 新建一个名为docker-compose.yml的文件，文件内容如下：
 version: '3'
 services:
   scanner:
@@ -92,19 +91,9 @@ services:
 # docker-compose up -d # 第二步，启动镜像
 ```
 
-**或者**
-
-请按照实际情况修改 docker-compose.yml 文件里关于redis和mongodb的信息。
-```
-# git clone https://github.com/zj1244/beholder_scanner.git
-# cd beholder_scanner
-# vi docker-compose.yml #需要修改redis和mongodb的配置信息
-# docker-compose up -d
-```
-
 ### 2. 检查scanner是否正常启动
 输入如下命令，如果输出`扫描开始`则表示启动成功
 ```
-# docker logs $(docker ps | grep beholder_scanner | awk '{print $1}')
+# docker logs $(docker ps | grep zj1244/beholder_scanner | awk '{print $1}')
 [2020-02-15 15:48:56,575] [INFO] 扫描开始
 ```

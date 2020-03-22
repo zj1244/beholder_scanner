@@ -4,7 +4,7 @@ import datetime
 import json
 import struct
 import socket
-import os
+
 import json
 from scanner.config import *
 
@@ -21,6 +21,9 @@ except ImportError:
     log.warning("error Missing Mailer .")
 
 
+def check_heartbeat():
+    redis.hset(hash_name="beholder_node",key=get_node_ip(),value=time())
+    sleep(60*5)
 def save_setting():
     setting = {
     }
@@ -78,7 +81,7 @@ def get_ip_list(start_ip, end_ip):
     return ip_list
 
 
-def get_ip(ip="8.8.8.8", port=80):
+def get_node_ip(ip="8.8.8.8", port=80):
     csock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     csock.connect((ip, port))
     (addr, port) = csock.getsockname()
@@ -147,7 +150,7 @@ def run_nmap(scan_key, scan_data):
 def diff_port():
     while True:
         try:
-
+            check_heartbeat()
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
             mongo_task = mongo.conn[MONGO_DB_NAME][MONGO_TASKS_COLL_NAME]
             mongo_scan_result = mongo.conn[MONGO_DB_NAME][MONGO_RESULT_COLL_NAME]
@@ -466,3 +469,7 @@ def format_html(scan_time="", add_ips_count=0, add_ports_count=0, del_ips_count=
 
     """ % (scan_time, add_ips_count, add_ports_count, del_ips_count, add_ips_html, add_ports_html, del_ips_html)
     return html
+
+if __name__ == '__main__':
+   x= redis.hdel(hash_name="beholder_node",key="123123")
+   pass

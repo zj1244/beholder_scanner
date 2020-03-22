@@ -88,12 +88,19 @@ class PyRedis(object):
         """
         return self.__db.lrange(key, start, end)
 
-    def del_key(self, key):
+    def del_key(self, *key):
         """
         删除键
         :return:
         """
-        self.__db.delete(key)
+        self.__db.delete(*key)
+
+    def keys(self, pattern='*'):
+        """
+        获得指定keys
+        :return:
+        """
+        return self.__db.keys(pattern)
 
     def exists_key(self, key):
         """
@@ -157,31 +164,11 @@ class PyRedis(object):
     def zremrangebyscore(self, key, min, max):
         return self.__db.zremrangebyscore(key, min, max)
 
-    def publish(self,channel,msg):
-        return self.__db.publish(channel,msg)
-
-    def subscribe(self,channel):
-        pub=self.__db.pubsub()
-        pub.subscribe(channel)
-        pub.listen()
-
-        return pub
-
-
 
 if __name__ == '__main__':
     from scanner.config import *
 
-    b =  [('x', 108.0), ('b', 4.0)]
-    score1 = 10
-
-    data2 = "bar"
-    score2 = 20
-
     redis_queue = PyRedis(hostname=REDIS_IP, port=REDIS_PORT, password=REDIS_PWD)
-    # redis_queue.del_key("scan_5c989f07e8123c748804de4f")
-    #
-    a = redis_queue.zadd("ack_scan_5c989f07e8123c748804de4f", {"a":1})
-    a = redis_queue.zremrangebyscore("ack_scan_5c989f07e8123c748804de4f", "-INF", "+INF")
 
-
+    a = redis_queue.zadd("ack_scan_5c989f07e8123c748804de4f", {"a": 1})
+    a = redis_queue.zremrangebyscore("ack_*", "-INF", "+INF")
