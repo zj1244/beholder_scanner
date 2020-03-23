@@ -1,7 +1,7 @@
 ## 部署mongodb和redis（如已安装跳过）
 
-* [mongodb安装](./docs/mongodb.md)
-* [redis安装](./docs/redis.md)
+* [mongodb安装](./mongodb.md)
+* [redis安装](./redis.md)
 
 ## 部署 beholder_web和beholder_scanner
 
