@@ -35,9 +35,10 @@
 * [mongodb安装](./docs/mongodb.md)
 * [redis安装](./docs/redis.md)
 
+***
+
 **常规部署**步骤如下：
 
-***
 
 #### 1. 添加mongodb认证
 
@@ -55,6 +56,7 @@
 **把本项目下的`db`文件夹复制到 mongodb 所在机器**，进入`db`文件夹，执行如下命令：
 
 ```
+
 # mongorestore -u scan -p 123456 --authenticationDatabase admin -d portscan .
 ```
 

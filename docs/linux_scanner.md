@@ -43,7 +43,7 @@ VULSCAN_KEY = ""  # 用于后续扫描的队列，保持默认为空即可
 
 # db配置，需按照实际情况修改
 MONGO_IP = os.environ.get("MONGO_IP", "127.0.0.1")  # mongodb的ip
-MONGO_PORT = int(os.environ.get("MONGO_PORT", 27019))  # mongodb的端口
+MONGO_PORT = int(os.environ.get("MONGO_PORT", 27017))  # mongodb的端口
 MONGO_USER = os.environ.get("MONGO_USER", "scan")  # mongodb的用户名
 MONGO_PWD = os.environ.get("MONGO_PWD", "123456")  # mongodb的密码
 
