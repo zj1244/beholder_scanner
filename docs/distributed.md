@@ -69,7 +69,7 @@ services:
 
 目的：在多台机器上重复部署beholder_scanner提高扫描速度。
 
-### 1. 构建镜像&&启动容器
+### 1. 构建镜像
 
 使用 vi 新建一个名为docker-compose.yml的文件，复制粘贴如下内容：
 
@@ -88,10 +88,16 @@ services:
       MONGO_PORT: 27017
       MONGO_USER: scan
       MONGO_PWD: 123456
-# docker-compose up -d # 第二步，启动镜像
+
 ```
 
-### 2. 检查scanner是否正常启动
+### 2. 启动容器
+
+```
+# docker-compose up -d
+```
+
+### 3. 检查scanner是否正常启动
 输入如下命令，如果输出`扫描开始`则表示启动成功
 ```
 # docker logs $(docker ps | grep zj1244/beholder_scanner | awk '{print $1}')
