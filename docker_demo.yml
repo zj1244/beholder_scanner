@@ -16,7 +16,7 @@ services:
       - redis
       - mongo
   web:
-    build: .
+    image: zj1244/beholder_web:latest
     container_name: beholder_web
     ports:
       - "8000:8000"
