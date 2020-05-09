@@ -26,7 +26,6 @@ class Masscan(object):
         self._scaninfo = {}
         is_masscan_found = False  # true if we have found masscan
 
-
         # launch 'masscan -V', we wait after
         # 'Masscan version 1.0.3 ( https://github.com/robertdavidgraham/masscan )'
         # This is for Mac OSX. When idle3 is launched from the finder, PATH is not set so masscan was not found
@@ -130,7 +129,7 @@ class Nmap(nmap.PortScanner):
         # [{'ip': '192.168.47.111', 'port': 80, 'service': 'http', 'version_info': 'nginx 1.10.2'}, {'ip': '192.168.47.111', 'port': 22, 'service': 'ssh', 'version_info': 'OpenSSH 6.6.1 (protocol 2.0)'}]
         scan_result_list = []
 
-        for k_ip, p_port in self._scan_result['scan'].items():
+        for k_ip, p_port in self._scan_result.get('scan', {}).items():
             if 'tcp' in p_port.keys():
                 for k, v in p_port['tcp'].items():
 
@@ -155,7 +154,6 @@ class Nmap(nmap.PortScanner):
         return scan_result_list
 
     def scan(self, hosts='127.0.0.1', ports=None, arguments='-sV', sudo=False, timeout=60 * 5):
-
         if sys.version_info[0] == 2:
             assert type(hosts) in (str, unicode), 'Wrong type for [hosts], should be a string [was {0}]'.format(
                 type(hosts))  # noqa
@@ -233,5 +231,5 @@ class Nmap(nmap.PortScanner):
 if __name__ == "__main__":
     port = "1-65535"
     nm = Nmap()
-    x = nm.scan(hosts='192.168.82.26', arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port)
+    x = nm.scan(hosts='192.168.47.144', arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=5)
     print nm.scan_result()
