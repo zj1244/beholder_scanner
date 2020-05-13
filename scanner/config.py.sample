@@ -8,7 +8,7 @@ FIND_HOST = os.environ.get("FIND_HOST", 1)
 REDIS_IP = os.environ.get("REDIS_IP", "127.0.0.1")  # redis的ip
 REDIS_PORT = str(os.environ.get("REDIS_PORT", "6379"))  # redis的端口
 REDIS_PWD = os.environ.get("REDIS_PWD", "pwd")  # redis的连接密码
-VULSCAN_KEY = ""  # 用于后续扫描的队列，保持默认为空即可
+VULSCAN_KEY = os.environ.get("VULSCAN_KEY", "pwd")  # 用于后续扫描的队列，没后续扫描则保留为空
 
 # db配置，需按照实际情况修改
 MONGO_IP = os.environ.get("MONGO_IP", "127.0.0.1")  # mongodb的ip
