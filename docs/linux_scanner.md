@@ -34,6 +34,8 @@ import os
 
 # 1是ping发现主机，0是通过发送tcp syn包到指定端口来发现主机
 FIND_HOST = os.environ.get("FIND_HOST", 1)
+# 扫描超时设置，单位秒
+SCAN_TIMEOUT=os.environ.get("SCAN_TIMEOUT", 600)
 
 # redis配置，需按照实际情况修改
 REDIS_IP = os.environ.get("REDIS_IP", "127.0.0.1")  # redis的ip

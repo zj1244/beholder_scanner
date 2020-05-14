@@ -22,8 +22,10 @@ except ImportError:
 
 
 def check_heartbeat():
-    redis.hset(hash_name="beholder_node",key=get_node_ip(),value=time())
-    sleep(60*5)
+    redis.hset(hash_name="beholder_node", key=get_node_ip(), value=time())
+    sleep(60 * 5)
+
+
 def save_setting():
     setting = {
     }
@@ -117,9 +119,9 @@ def run_nmap(scan_key, scan_data):
         port = str(scan_data_dict['port'])
         log.info("pid=%s,nmap开始扫描:%s" % (os.getpid(), scan_data))
         if FIND_HOST:
-            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port)
+            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port, timeout=SCAN_TIMEOUT)
         else:
-            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port)
+            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=SCAN_TIMEOUT)
 
         nmap_result_list = nm.scan_result()
 
@@ -162,7 +164,7 @@ def diff_port():
                 for t in cron_task_running:
 
                     if not redis.get_key("scan_" + str(t["_id"])) and not redis.get_key(
-                                    "ack_scan_" + str(t["_id"])):
+                            "ack_scan_" + str(t["_id"])):
                         log.info("扫描结束")
                         mongo_task.update_one({"_id": t["_id"]},
                                               {"$set": {"task_status": "finish", "end_time": datetime.datetime.now()}})
@@ -470,6 +472,7 @@ def format_html(scan_time="", add_ips_count=0, add_ports_count=0, del_ips_count=
     """ % (scan_time, add_ips_count, add_ports_count, del_ips_count, add_ips_html, add_ports_html, del_ips_html)
     return html
 
+
 if __name__ == '__main__':
-   x= redis.hdel(hash_name="beholder_node",key="123123")
-   pass
+    x = redis.hdel(hash_name="beholder_node", key="123123")
+    pass
