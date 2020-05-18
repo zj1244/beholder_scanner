@@ -13,6 +13,7 @@ services:
       MONGO_PORT: 27017
       MONGO_USER: scan
       MONGO_PWD: 123456
+      SCAN_TIMEOUT: 300
   web:
     image: zj1244/beholder_web:latest
     ports:
