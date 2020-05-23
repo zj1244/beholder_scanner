@@ -125,8 +125,6 @@ class PortScannerError(Exception):
 
 class Nmap(nmap.PortScanner):
     def scan_result(self):
-        # 返回数据
-        # [{'ip': '192.168.47.111', 'port': 80, 'service': 'http', 'version_info': 'nginx 1.10.2'}, {'ip': '192.168.47.111', 'port': 22, 'service': 'ssh', 'version_info': 'OpenSSH 6.6.1 (protocol 2.0)'}]
         scan_result_list = []
 
         for k_ip, p_port in self._scan_result.get('scan', {}).items():

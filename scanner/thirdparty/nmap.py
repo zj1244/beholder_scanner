@@ -79,7 +79,8 @@ class PortScanner(object):
     """
 
     def __init__(self, nmap_search_path=(
-    'nmap', '/usr/bin/nmap', '/usr/local/bin/nmap', '/sw/bin/nmap', '/opt/local/bin/nmap')):
+            'nmap', '/usr/bin/nmap', '/usr/local/bin/nmap', '/sw/bin/nmap', '/opt/local/bin/nmap',
+            'c:\\Program Files (x86)\\Nmap\\nmap.exe', 'D:\\Program Files (x86)\\Nmap\\nmap.exe')):
         """
         Initialize PortScanner module
 

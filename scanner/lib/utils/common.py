@@ -45,11 +45,14 @@ def save_setting():
 
 
 def load_setting():
-    if os.path.exists("scanner/setting.json"):
-        with open("scanner/setting.json") as fp:
-
+    setting_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
+    setting_path = os.path.join(setting_path, "setting.json")
+    if os.path.exists(setting_path):
+        with open(setting_path) as fp:
             return str2dict(fp.read())
     else:
+
+        log.warning("未找到setting.json")
         return {}
 
 
