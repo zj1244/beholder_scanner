@@ -1,7 +1,7 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 import datetime
-import json
+import sys
 import struct
 import socket
 
@@ -14,6 +14,8 @@ from scanner import redis, log
 from scanner.lib.utils.mongodb import Mongodb
 from scanner.lib.utils.portscan import Nmap
 
+reload(sys)
+sys.setdefaultencoding('utf8')
 try:
     from mailer import Mailer
     from mailer import Message
