@@ -37,7 +37,7 @@ class ParentsProcess(multiprocessing.Process):
                 if len(ack_key):
                     timeout_data = redis.zrangebyscore(ack_key[0], "-INF", time() - 60 * 5, 0, 1)
                     if timeout_data:
-                        log.debug("触发ack:%s" % timeout_data[0])
+                        log.debug("ack:%s" % timeout_data[0])
                         redis.zrem(ack_key[0], timeout_data[0])
                         redis.put(ack_key[0].replace("ack_scan_", "scan_"), timeout_data[0])
                 scan_key = redis.get_key("scan_*")

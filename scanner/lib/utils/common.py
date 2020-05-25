@@ -20,12 +20,18 @@ try:
     from mailer import Mailer
     from mailer import Message
 except ImportError:
-    log.warning("error Missing Mailer .")
+    log.warning("error Missing Mailer")
 
 
 def check_heartbeat():
     redis.hset(hash_name="beholder_node", key=get_node_ip(), value=time())
     sleep(60 * 5)
+
+
+def get_setting_path():
+    setting_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
+    setting_path = os.path.join(setting_path, "setting.json")
+    return setting_path
 
 
 def save_setting():
@@ -36,10 +42,12 @@ def save_setting():
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
             result = mongo.conn[MONGO_DB_NAME][MONGO_SETTING_COLL_NAME].find_one({})
 
+            setting_path = get_setting_path()
+
             for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender"]:
                 setting[key] = result.get(key, "")
 
-            with open("scanner/setting.json", "w+") as fp:
+            with open(setting_path, "w+") as fp:
                 fp.write(dict2str(setting))
         except:
             pass
@@ -47,14 +55,13 @@ def save_setting():
 
 
 def load_setting():
-    setting_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
-    setting_path = os.path.join(setting_path, "setting.json")
+    setting_path = get_setting_path()
     if os.path.exists(setting_path):
         with open(setting_path) as fp:
             return str2dict(fp.read())
     else:
 
-        log.warning("未找到setting.json")
+        log.info("未找到setting.json")
         return {}
 
 
@@ -126,7 +133,8 @@ def run_nmap(scan_key, scan_data):
         if FIND_HOST:
             nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port, timeout=int(SCAN_TIMEOUT))
         else:
-            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=int(SCAN_TIMEOUT))
+            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port,
+                    timeout=int(SCAN_TIMEOUT))
 
         nmap_result_list = nm.scan_result()
 
@@ -226,7 +234,8 @@ def diff_port():
                                                add_ports_count=len(add_ports), del_ips_count=len(del_ips),
                                                add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
 
-                        send_mail(subject="【%s】端口对比结果" % date, contents=contents, host=setting["email_server"],
+                        send_mail(subject="【%s】【%s】端口对比结果" % (date, task_name['_id']), contents=contents,
+                                  host=setting["email_server"],
                                   use_ssl=True,
                                   sender=setting["sender"], pwd=setting["email_pwd"],
                                   email_address=setting["email_address"])
