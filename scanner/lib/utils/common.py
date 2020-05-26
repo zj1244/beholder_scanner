@@ -49,8 +49,8 @@ def save_setting():
 
             with open(setting_path, "w+") as fp:
                 fp.write(dict2str(setting))
-        except:
-            pass
+        except Exception as e:
+            log.exception("save setting failed : %s" % e)
         sleep(60)
 
 
@@ -130,11 +130,11 @@ def run_nmap(scan_key, scan_data):
         ip = scan_data_dict['ip']
         port = str(scan_data_dict['port'])
         log.info("pid=%s,nmap开始扫描:%s" % (os.getpid(), scan_data))
+        timeout = int(globals().get("SCAN_TIMEOUT", 300))
         if FIND_HOST:
-            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port, timeout=int(SCAN_TIMEOUT))
+            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port, timeout=timeout)
         else:
-            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port,
-                    timeout=int(SCAN_TIMEOUT))
+            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=timeout)
 
         nmap_result_list = nm.scan_result()
 
