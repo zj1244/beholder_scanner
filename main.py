@@ -3,7 +3,7 @@
 import sys
 import os
 from scanner import redis, log
-
+from scanner.config import *
 import multiprocessing
 import threading
 from time import sleep, time
@@ -29,13 +29,13 @@ class ParentsProcess(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
 
     def run(self):
-
+        timeout = int(globals().get("SCAN_TIMEOUT", 300))
         while True:
             try:
                 ack_key = redis.get_key("ack_scan_*")
 
                 if len(ack_key):
-                    timeout_data = redis.zrangebyscore(ack_key[0], "-INF", time() - 60 * 5, 0, 1)
+                    timeout_data = redis.zrangebyscore(ack_key[0], "-INF", time() - timeout, 0, 1)
                     if timeout_data:
                         log.debug("ack:%s" % timeout_data[0])
                         redis.zrem(ack_key[0], timeout_data[0])
