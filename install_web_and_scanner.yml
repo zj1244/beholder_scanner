@@ -14,6 +14,8 @@ services:
       MONGO_USER: scan
       MONGO_PWD: 123456
       SCAN_TIMEOUT: 300
+      # 用于后续扫描的队列，保持默认为空即可
+      VULSCAN_KEY: ""
   web:
     image: zj1244/beholder_web:latest
     ports:
@@ -22,7 +24,7 @@ services:
     environment:
       # 登陆用户名密码
       ACCOUNT: "admin"
-      PASSWORD: "123456"
+      PASSWORD: "admin"
       # 请修改以下redis和mongodb的配置
       REDIS_IP: 192.168.47.168
       REDIS_PORT: 6379

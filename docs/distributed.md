@@ -7,7 +7,7 @@
 
 ### 1. 构建镜像
 
-新建个install_web_and_scanner.yml文件，复制粘贴如下内容：
+新建个install_web_and_scanner.yml文件，复制粘贴如下内容，并根据实际情况修改redis和mongo配置信息：
 
 ```
 version: '3'
@@ -25,6 +25,9 @@ services:
       MONGO_PORT: 27017
       MONGO_USER: scan
       MONGO_PWD: 123456
+      SCAN_TIMEOUT: 300
+      # 用于后续扫描的队列，保持默认为空即可
+      VULSCAN_KEY: ""
   web:
     image: zj1244/beholder_web:latest
     ports:
@@ -33,7 +36,7 @@ services:
     environment:
       # 登陆用户名密码
       ACCOUNT: "admin"
-      PASSWORD: "123456"
+      PASSWORD: "admin"
       # 请修改以下redis和mongodb的配置
       REDIS_IP: 192.168.47.168
       REDIS_PORT: 6379
@@ -89,7 +92,8 @@ services:
       MONGO_PORT: 27017
       MONGO_USER: scan
       MONGO_PWD: 123456
-
+      SCAN_TIMEOUT: 300
+      VULSCAN_KEY: "vul_scan"
 ```
 
 ### 2. 启动容器

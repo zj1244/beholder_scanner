@@ -14,3 +14,5 @@ services:
       MONGO_USER: scan
       MONGO_PWD: 123456
       SCAN_TIMEOUT: 300
+      # 用于后续扫描的队列，保持默认为空即可
+      VULSCAN_KEY: ""

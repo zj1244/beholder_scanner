@@ -41,14 +41,14 @@ def save_setting():
         try:
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
             result = mongo.conn[MONGO_DB_NAME][MONGO_SETTING_COLL_NAME].find_one({})
+            if result:
+                setting_path = get_setting_path()
 
-            setting_path = get_setting_path()
+                for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender"]:
+                    setting[key] = result.get(key, "")
 
-            for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender"]:
-                setting[key] = result.get(key, "")
-
-            with open(setting_path, "w+") as fp:
-                fp.write(dict2str(setting))
+                with open(setting_path, "w+") as fp:
+                    fp.write(dict2str(setting))
         except Exception as e:
             log.exception("save setting failed : %s" % e)
         sleep(60)

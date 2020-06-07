@@ -25,6 +25,8 @@ services:
       MONGO_PORT: 27017
       MONGO_USER: ""
       MONGO_PWD: ""
+      SCAN_TIMEOUT: 300
+      VULSCAN_KEY: ""
     depends_on:
       - redis
       - mongo
@@ -35,6 +37,8 @@ services:
       - "8000:8000"
     restart: always
     environment:
+      ACCOUNT: "admin"
+      PASSWORD: "admin"
       REDIS_IP: redis
       REDIS_PORT: 6379
       REDIS_PWD: ""

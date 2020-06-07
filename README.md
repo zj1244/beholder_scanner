@@ -53,10 +53,11 @@
 
 #### 2. 导入数据库
 
-**把本项目下的`db`文件夹复制到 mongodb 所在机器**，进入`db`文件夹，执行如下命令：
+**把beholder_scanner项目下的`db`文件夹导入 mongodb** 。**在 mongodb 服务器上**执行如下命令：
 
 ```
-
+# git clone https://github.com/zj1244/beholder_scanner.git
+# cd beholder_scanner/db/
 # mongorestore -u scan -p 123456 --authenticationDatabase admin -d portscan .
 ```
 
