@@ -93,7 +93,7 @@ services:
       MONGO_USER: scan
       MONGO_PWD: 123456
       SCAN_TIMEOUT: 300
-      VULSCAN_KEY: "vul_scan"
+      VULSCAN_KEY: ""
 ```
 
 ### 2. 启动容器
