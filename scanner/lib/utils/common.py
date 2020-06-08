@@ -233,7 +233,8 @@ def diff_port():
                         contents = format_html(scan_time=date, add_ips_count=len(add_ips),
                                                add_ports_count=len(add_ports), del_ips_count=len(del_ips),
                                                add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
-
+                        if "," in setting["email_address"]:
+                            setting["email_address"] = setting["email_address"].split(",")
                         send_mail(subject="【%s】【%s】端口对比结果" % (date, task_name['_id']), contents=contents,
                                   host=setting["email_server"],
                                   use_ssl=True,
