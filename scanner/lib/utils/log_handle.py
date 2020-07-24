@@ -38,7 +38,6 @@ class Log(object):
         self.logger.handlers[0].formatter._fmt = self.COLOR_SEQ % (
             30 + self.COLORS['INFO']) + '[%(asctime)s] [%(levelname)s] %(message)s' + self.RESET_SEQ
         self.logger.info(msg)
-        pass
 
     def warning(self, msg):
         self.logger.handlers[0].formatter._fmt = self.COLOR_SEQ % (

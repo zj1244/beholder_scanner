@@ -8,7 +8,7 @@ import multiprocessing
 import threading
 from time import sleep, time
 from scanner.lib.utils.common import save_setting, load_setting,check_heartbeat
-from scanner.lib.utils.common import run_nmap, diff_port
+from scanner.lib.utils.common import run_nmap, task_process
 
 
 class ChildProcess(multiprocessing.Process):
@@ -67,8 +67,8 @@ class ParentsProcess(multiprocessing.Process):
 if __name__ == "__main__":
 
     # test = Nmap()
-
-    for func in [diff_port, save_setting,check_heartbeat]:
+    # task_process()
+    for func in [task_process, save_setting,check_heartbeat]:
         t1 = threading.Thread(target=func)
         t1.setDaemon(True)
         t1.start()

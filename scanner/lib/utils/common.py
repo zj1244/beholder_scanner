@@ -70,10 +70,10 @@ def send_mail(subject, contents, host, use_ssl, sender, pwd, email_address):
                       To=email_address, charset="utf-8")
     message.Subject = subject
     message.Html = contents
-    sender = Mailer(host=host, use_ssl=use_ssl, usr=sender[:sender.find("@")],
+    mailer = Mailer(host=host, use_ssl=use_ssl, usr=sender[:sender.find("@")],
                     pwd=pwd)
 
-    sender.send(message, debug=False)
+    mailer.send(message, debug=False)
 
     log.info("sender:%s,to=%s" % (sender, email_address))
 
@@ -162,7 +162,7 @@ def run_nmap(scan_key, scan_data):
         redis.zrem("ack_" + scan_key, scan_data)
 
 
-def diff_port():
+def task_process():
     while True:
         try:
             check_heartbeat()
@@ -183,76 +183,100 @@ def diff_port():
                                               {"$set": {"task_status": "finish", "end_time": datetime.datetime.now()}})
 
             task_names = mongo_task.aggregate(
-                [{"$match": {"task_type": "loop", "task_status": "finish", "diff_result.diff": 0}},
-                 {"$group": {"_id": "$name"}}])
+                [{"$match": {"task_status": "finish", "$or": [{"diff_result.diff": 0}, {"monitor_result.monitor": 0}]}},
+                 {"$group": {"_id": "$name", "last_doc": {"$last": "$$ROOT"}}}])
 
             for task_name in task_names:
+                setting = load_setting()
 
-                tasks = mongo_task.find(
-                    {"name": task_name['_id'], "task_status": "finish"}
-                ).sort([('create_time', -1)]).limit(3)
-                if tasks.count() > 2:
-                    new_task = tasks[0]
-                    lasttime_task_0 = tasks[1]
-                    lasttime_task_1 = tasks[2]
-
-                    new_ip_ports, old_ip_ports_1, old_ip_ports_0 = set(), set(), set()
-                    new_ips, old_ips_0, old_ips_1 = set(), set(), set()
-
-                    results = mongo_scan_result.find({"base_task_id": new_task['_id']})
+                date = strftime('%Y-%m-%d', localtime())
+                if task_name["last_doc"]["task_type"] == "monitor_task":
+                    ip_port = set()
+                    results = mongo_scan_result.find({"base_task_id": task_name['last_doc']['_id']})
                     for result in results:
-                        new_ip_ports.add("%s:%s" % (result['ip'], result['port']))
-                        new_ips.add(result['ip'])
-
-                    results = mongo_scan_result.find({"base_task_id": lasttime_task_0['_id']})
-                    for result in results:
-                        old_ip_ports_0.add("%s:%s" % (result['ip'], result['port']))
-                        old_ips_0.add(result['ip'])
-
-                    results = mongo_scan_result.find({"base_task_id": lasttime_task_1['_id']})
-                    for result in results:
-                        old_ip_ports_1.add("%s:%s" % (result['ip'], result['port']))
-                        old_ips_1.add(result['ip'])
-
-                    add_ports = new_ip_ports - old_ip_ports_0 - old_ip_ports_1
-                    add_ips = new_ips - old_ips_0 - old_ips_1
-
-                    date = strftime('%Y-%m-%d', localtime())
-
-                    del_ports = old_ip_ports_0 - new_ip_ports
-                    del_ips = old_ips_0 - new_ips
-
-                    mongo_task.update_one({"_id": new_task['_id']}, {
-                        "$set": {"diff_result.diff": 1, "diff_result.add_ips": list(add_ips),
-                                 "diff_result.add_ports": list(add_ports)}})
-                    mongo_task.update_many({"name": task_name['_id'], "diff_result.diff": 0}, {
-                        "$set": {"diff_result.diff": 1}})
-                    setting = load_setting()
+                        ip_port.add("%s:%s" % (result['ip'], result['port']))
 
                     if setting["mail_enable"] == "on":
-                        contents = format_html(scan_time=date, add_ips_count=len(add_ips),
-                                               add_ports_count=len(add_ports), del_ips_count=len(del_ips),
-                                               add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
+                        mail_contents = format_monitor_html(scan_time=date, ips_count=len(ip_port), ips=ip_port)
                         if "," in setting["email_address"]:
                             setting["email_address"] = setting["email_address"].split(",")
-                        send_mail(subject="【%s】【%s】端口对比结果" % (date, task_name['_id']), contents=contents,
+                        send_mail(subject="【%s】【%s】监控端口开放结果" % (date, task_name['_id']), contents=mail_contents,
                                   host=setting["email_server"],
                                   use_ssl=True,
                                   sender=setting["sender"], pwd=setting["email_pwd"],
                                   email_address=setting["email_address"])
 
-                else:
-                    log.info("任务是第一次扫描")
+                    mongo_task.update_one({"_id": task_name['last_doc']['_id']}, {
+                        "$set": {"monitor_result.monitor": 1, "monitor_result.ip_port": list(ip_port),
+                                 }})
 
-                for task in tasks:
-                    mongo_task.update_one({"_id": task['_id']}, {"$set": {"diff_result.diff": 1}})
+                elif task_name["last_doc"]["task_type"] == "diff_task":
+                    tasks = mongo_task.find(
+                        {"name": task_name['_id'], "task_status": "finish"}
+                    ).sort([('create_time', -1)]).limit(3)
+                    if tasks.count() > 2:
+                        new_task = tasks[0]
+                        lasttime_task_0 = tasks[1]
+                        lasttime_task_1 = tasks[2]
+
+                        new_ip_ports, old_ip_ports_1, old_ip_ports_0 = set(), set(), set()
+                        new_ips, old_ips_0, old_ips_1 = set(), set(), set()
+
+                        results = mongo_scan_result.find({"base_task_id": new_task['_id']})
+                        for result in results:
+                            new_ip_ports.add("%s:%s" % (result['ip'], result['port']))
+                            new_ips.add(result['ip'])
+
+                        results = mongo_scan_result.find({"base_task_id": lasttime_task_0['_id']})
+                        for result in results:
+                            old_ip_ports_0.add("%s:%s" % (result['ip'], result['port']))
+                            old_ips_0.add(result['ip'])
+
+                        results = mongo_scan_result.find({"base_task_id": lasttime_task_1['_id']})
+                        for result in results:
+                            old_ip_ports_1.add("%s:%s" % (result['ip'], result['port']))
+                            old_ips_1.add(result['ip'])
+
+                        add_ports = new_ip_ports - old_ip_ports_0 - old_ip_ports_1
+                        add_ips = new_ips - old_ips_0 - old_ips_1
+
+                        del_ports = old_ip_ports_0 - new_ip_ports
+                        del_ips = old_ips_0 - new_ips
+
+                        mongo_task.update_one({"_id": new_task['_id']}, {
+                            "$set": {"diff_result.diff": 1, "diff_result.add_ips": list(add_ips),
+                                     "diff_result.add_ports": list(add_ports)}})
+                        mongo_task.update_many({"name": task_name['_id'], "diff_result.diff": 0}, {
+                            "$set": {"diff_result.diff": 1}})
+
+                        if setting["mail_enable"] == "on":
+                            contents = format_diff_html(scan_time=date, add_ips_count=len(add_ips),
+                                                        add_ports_count=len(add_ports), del_ips_count=len(del_ips),
+                                                        add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
+                            if "," in setting["email_address"]:
+                                setting["email_address"] = setting["email_address"].split(",")
+                            send_mail(subject="【%s】【%s】端口对比结果" % (date, task_name['_id']), contents=contents,
+                                      host=setting["email_server"],
+                                      use_ssl=True,
+                                      sender=setting["sender"], pwd=setting["email_pwd"],
+                                      email_address=setting["email_address"])
+
+                    else:
+                        log.info("任务是第一次扫描")
+
+                        for task in tasks:
+                            mongo_task.update_one({"_id": task['_id']}, {"$set": {"diff_result.diff": 1}})
+                else:
+                    pass
+
+
         except Exception as e:
             log.exception(e)
         sleep(60)
 
 
-def format_html(scan_time="", add_ips_count=0, add_ports_count=0, del_ips_count=0, add_ips=set(), add_ports=set(),
-                del_ips=set()):
+def format_diff_html(scan_time="", add_ips_count=0, add_ports_count=0, del_ips_count=0, add_ips=set(), add_ports=set(),
+                     del_ips=set()):
     # 邮件正文
 
     add_ips_html = ""
@@ -488,6 +512,133 @@ def format_html(scan_time="", add_ips_count=0, add_ports_count=0, del_ips_count=
     return html
 
 
+def format_monitor_html(scan_time="", ips_count=0, ips=set()):
+    # 邮件正文
+
+    ips_html = ""
+
+    for ip in ips:
+        ips_html += """
+         <tr>
+        <td style="height: auto; padding: 0px 20px; color: rgb(51, 51, 51); font-size: 13px; border-bottom: 1px solid rgb(238, 238, 238); border-left: 1px solid rgb(238, 238, 238); font-family: &quot;Microsoft YaHei&quot;, SimSun, Tahoma, Verdana, Arial, Helvetica, sans-serif;">%s</td> 
+       </tr> """ % ip
+
+    html = """
+    <table cellpadding="0" cellspacing="0" style="margin: 0px; padding: 0px; width: 1000px;" _ow="1280px"> 
+       <tbody> 
+        <tr style="padding:0;"> 
+         <td valign="middle" style="padding: 0px 24px; height: auto; width: 100%%; background-color: rgb(20, 158, 204);"> 
+          <table bgcolor="#149ECC" cellpadding="0" cellspacing="0" style="padding:0;color:#ffffff;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;"> 
+           <tbody> 
+            <tr> 
+             <td valign="middle" style="height: auto; color: rgb(255, 255, 255); line-height: 20px; font-size: 20px; vertical-align: middle; border: none; padding: 0px; margin: 0px; font-family: &quot;Microsoft YaHei&quot;, SimSun, Tahoma, Verdana, Arial, Helvetica, sans-serif;">监控端口开放情况结果</td> 
+             <td style="width: 9px; height: auto; padding: 0px;"></td> 
+             <td style="width: 3px; height: auto; padding: 0px; color: rgb(255, 255, 255);">|</td> 
+             <td style="width: 9px; height: auto; padding: 0px;"></td> 
+             <td style="height: auto; color: rgb(255, 255, 255); line-height: 21px; font-size: 12px; vertical-align: middle; border: none; padding: 0px; margin: 0px; font-family: &quot;Microsoft YaHei&quot;, SimSun, Tahoma, Verdana, Arial, Helvetica, sans-serif;"><span>%s</span></td> 
+            </tr> 
+           </tbody> 
+          </table></td> 
+        </tr> 
+        <tr> 
+         <td valign="middle" style="padding:20.0px 24.0px;width:100.0%%;"> 
+          <table cellpadding="0" cellspacing="0" style="width:100.0%%;padding:0;color:#ffffff;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;"> 
+           <tbody> 
+            <tr> 
+             <td bgcolor="#0095b3" style="width: 3px; height: auto; padding: 0px; background-color: rgb(20, 158, 204);"></td> 
+             <td style="width: 9px; height: auto; padding: 0px;"></td> 
+             <td style="line-height: 20px; color: rgb(66, 66, 66); font-family: &quot;Microsoft YaHei&quot;, SimSun, Tahoma, Verdana, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 16px; height: auto;">结果概述</td> 
+            </tr> 
+           </tbody> 
+          </table></td> 
+        </tr> 
+        <tr> 
+         <td valign="middle" style="padding:0 24.0px 10.0px;width:100.0%%;"> 
+          <table cellpadding="0" cellspacing="0" style="width:100.0%%;padding:0;color:#ffffff;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;"> 
+           <tbody> 
+            <tr> 
+             <td width="24%%" style="border: 2px solid rgb(238, 238, 238); height: auto;"> 
+              <table cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: none; border-spacing: 0px; margin: 0px; width: 100%%; height: auto; padding: 0px;"> 
+               <tbody> 
+                <tr> 
+                 <td style="width: 100px; height: auto; padding: 0px 0px 0px 30px; background-color: rgb(238, 238, 238); color: rgb(51, 51, 51); font-weight: 700; font-size: 14px;">端口开放数</td> 
+                 <td style="height: auto; background-color: rgb(238, 238, 238); text-align: right;"></td> 
+                </tr> 
+                <tr> 
+                 <td style="width:50.0%%;"> 
+                  <table cellpadding="0" cellspacing="0" style="width:auto;padding:0;border-collapse:collapse;"> 
+                   <tbody> 
+                    <tr> 
+                     <td valign="top" style="padding:0 10.0px 8.0px 30.0px;border:none;font-size:12.0px;color:#333333;vertical-align:top;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;">总数</td> 
+                    </tr> 
+                    <tr> 
+                     <td colspan="2" style="padding:0 0 0 30.0px;font-size:28.0px;color:#333333;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;">%s</td> 
+                    </tr> 
+                   </tbody> 
+                  </table></td> 
+                 <td style="width:50.0%%;"></td> 
+                </tr> 
+               </tbody> 
+              </table></td> 
+             <td style="width: 30px; height: auto;"></td> 
+
+            </tr> 
+           </tbody> 
+          </table></td> 
+        </tr> 
+        <tr> 
+         <td valign="middle" style="padding:10.0px 24.0px;width:100.0%%;"></td> 
+        </tr> 
+        <tr> 
+         <td valign="middle" style="padding:20.0px 24.0px;width:100.0%%;"> 
+          <table cellpadding="0" cellspacing="0" style="width:100.0%%;padding:0;color:#ffffff;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;"> 
+           <tbody> 
+            <tr> 
+             <td bgcolor="#0095b3" style="width: 3px; height: auto; padding: 0px; background-color: rgb(20, 158, 204);"></td> 
+             <td style="width: 9px; height: auto; padding: 0px;"></td> 
+             <td style="line-height: 20px; color: rgb(66, 66, 66); font-family: &quot;Microsoft YaHei&quot;, SimSun, Tahoma, Verdana, Arial, Helvetica, sans-serif; font-weight: 700; font-size: 16px; height: auto;">详情</td> 
+            </tr> 
+           </tbody> 
+          </table></td> 
+        </tr> 
+        <tr> 
+         <td style="padding:0 24.0px;margin:0;"> 
+          <table cellpadding="0" cellspacing="0" style="width:100.0%%;border-collapse:collapse;"> 
+           <tbody> 
+            <tr> 
+             <td align="left" colspan="5" valign="middle" style="background:#e6f1ff;font-size:14.0px;padding:0 16.0px;text-align:left;border:1.0px solid #bddbfc;color:#333333;vertical-align:middle;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;">以下为各功能的通知事件，更详细信息请直接登陆网站查看。</td> 
+            </tr> 
+           </tbody> 
+          </table></td> 
+        </tr> 
+        <tr> 
+         <td style="padding:0 24.0px;margin:0;"> 
+          <table cellpadding="0" cellspacing="0" style="width:100.0%%;border-collapse:collapse;"> 
+           <tbody> 
+            <tr> 
+             <td style="padding-top:26.0px;"> 
+              <table cellpadding="0" cellspacing="0" width="100%%" style="border-collapse:collapse;margin:0;width:100.0%%;padding:0;"> 
+               <tbody> 
+                <tr> 
+                 <th align="left" colspan="7" valign="middle" style="background:#f5f5f5;font-size:16.0px;padding:0 16.0px;text-align:left;border:1.0px solid #eeeeee;color:#333333;vertical-align:middle;font-family:Microsoft YaHei,SimSun,Tahoma,Verdana,Arial,Helvetica,sans-serif;">IP</th> 
+                </tr> 
+
+
+                 %s 
+
+               </tbody> 
+              </table></td> 
+            </tr> 
+           </tbody> 
+          </table></td> 
+        </tr> 
+        
+       </tbody> 
+      </table>  
+
+    """ % (scan_time, ips_count, ips_html)
+    return html
+
+
 if __name__ == '__main__':
-    x = redis.hdel(hash_name="beholder_node", key="123123")
-    pass
+    print format_diff_html()

@@ -13,7 +13,7 @@ class PyRedis(object):
 
         self.pool = redis.ConnectionPool(host=hostname, port=port, db=db, password=password)
         self.__db = redis.Redis(connection_pool=self.pool)
-        pass
+
 
     def qsize(self, key):
         """
