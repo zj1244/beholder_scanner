@@ -183,7 +183,9 @@ def task_process():
                                               {"$set": {"task_status": "finish", "end_time": datetime.datetime.now()}})
 
             task_names = mongo_task.aggregate(
-                [{"$match": {"task_status": "finish", "$or": [{"diff_result.diff": 0}, {"monitor_result.monitor": 0}]}},
+                [{"$match": {"task_status": "finish",
+                             "$or": [{"diff_result": {"$exists": False}}, {"diff_result.diff": 0},
+                                     {"monitor_result.monitor": 0}]}},
                  {"$group": {"_id": "$name", "last_doc": {"$last": "$$ROOT"}}}])
 
             for task_name in task_names:
@@ -210,7 +212,7 @@ def task_process():
                         "$set": {"monitor_result.monitor": 1, "monitor_result.ip_port": list(ip_port),
                                  }})
 
-                elif task_name["last_doc"]["task_type"] == "diff_task":
+                elif task_name["last_doc"]["task_type"] in [ "diff_task","loop"]:
                     tasks = mongo_task.find(
                         {"name": task_name['_id'], "task_status": "finish"}
                     ).sort([('create_time', -1)]).limit(3)
