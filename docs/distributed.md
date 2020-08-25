@@ -1,11 +1,19 @@
-## 部署mongodb和redis（如已安装跳过）
+## 基于docker的分布式部署
+
+### 依赖条件：
+
+项目运行依赖于mongodb和redis，所以需准备好mongodb和redis。   
+ 
+mongodb和redis安装请参考：
 
 * [mongodb安装](./mongodb.md)
 * [redis安装](./redis.md)
 
-## 部署 beholder_web和beholder_scanner
+***
 
-### 1. 构建镜像
+### 部署 beholder_web和beholder_scanner
+
+#### 1. 构建镜像
 
 新建个install_web_and_scanner.yml文件，复制粘贴如下内容，并根据实际情况修改redis和mongo配置信息：
 
@@ -47,13 +55,14 @@ services:
       MONGO_PWD: 123456
 ```
 
-### 2. 启动容器
+#### 2. 启动容器
 
 ```
 # docker-compose -f install_web_and_scanner.yml up -d
 ```
 
-### 3. 检查启动是否成功
+#### 3. 检查启动是否成功
+
 如果输出类似信息则启动成功，此时可访问[http://ip:8000](http://ip:8000)，输入install_web_and_scanner.yml里的用户名密码来登陆
 ```bash
 # docker logs $(docker ps | grep zj1244/beholder_web | awk '{print $1}')
@@ -66,13 +75,15 @@ services:
 ```
 
 
-至此整套程序部署完毕，如果需要部署多个scanner可以参考以下步骤
+**至此整套程序部署完毕。**  
 
-## 部署单个 beholder_scanner
+如果需要部署多个scanner可以参考以下步骤：
+
+### 部署单个 beholder_scanner
 
 目的：在多台机器上重复部署beholder_scanner提高扫描速度。
 
-### 1. 构建镜像
+#### 1. 构建镜像
 
 使用 vi 新建一个名为docker-compose.yml的文件，复制粘贴如下内容：
 
@@ -96,13 +107,13 @@ services:
       VULSCAN_KEY: ""
 ```
 
-### 2. 启动容器
+#### 2. 启动容器
 
 ```
 # docker-compose up -d
 ```
 
-### 3. 检查scanner是否正常启动
+#### 3. 检查scanner是否正常启动
 输入如下命令，如果输出`扫描开始`则表示启动成功
 ```
 # docker logs $(docker ps | grep zj1244/beholder_scanner | awk '{print $1}')

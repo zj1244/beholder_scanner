@@ -1,5 +1,14 @@
 ## Docker 下快速安装 Demo 版
 
+如果只是测试和尝鲜可以部署Demo版：
+
+优点：部署简单。  
+缺点：不利于扩展和管理，**并且默认redis和mongodb密码均为空，所以不建议用于生产环境。**
+
+### 依赖条件：
+
+提前安装好docker、docker-compose
+
 ### 1. 新建文件夹
 
 ```
@@ -82,4 +91,11 @@ services:
 [2020-03-18 Wednesday 00:20] [DEBUG] Next wakeup is due at 2020-03-18 01:11:13.959033+08:00 (in 3019.861167 seconds)
 # docker logs beholder_scanner
 [2020-03-18 00:20:52,385] [INFO] 扫描开始
+```
+
+### 5. 停止并删除相关容器
+
+测试完成后停止并删除容器
+```
+# docker-compose -f docker_demo.yml down
 ```
