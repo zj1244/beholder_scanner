@@ -30,7 +30,7 @@ mongodb和redis安装请参考：
 
 #### 2. 导入数据库
 
-**把beholder_scanner项目下的`db`文件夹导入 mongodb** 。**在 mongodb 服务器上**执行如下命令：
+把beholder_scanner项目下的`db`文件夹导入 mongodb 。**在 mongodb 服务器上**执行如下命令：
 
 ```
 # git clone https://github.com/zj1244/beholder_scanner.git
@@ -117,7 +117,7 @@ MONGO_SETTING_COLL_NAME = "setting"
 # cp config.env.sample config.env
 ```
 
-然后按照修改登陆用户名密码、mongodb和redis连接配置：
+然后修改登陆用户名密码、mongodb和redis连接配置：
 
 ```
 # username and password
