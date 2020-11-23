@@ -52,7 +52,7 @@ class ParentsProcess(multiprocessing.Process):
                         scan_data = redis.get(scan_key[0])
                         p = ChildProcess(scan_key[0], scan_data)
                         p.start()
-
+                        p.join()
                     else:
                         sleep(1)
                 else:
