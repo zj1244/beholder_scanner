@@ -57,7 +57,6 @@ class ParentsProcess(multiprocessing.Process):
                         sleep(1)
                 else:
                     sleep(1)
-                    break
             except Exception as e:
 
                 log.exception(e)
