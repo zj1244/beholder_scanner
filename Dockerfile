@@ -15,7 +15,6 @@ COPY . /opt/beholder_scanner
 RUN set -x \
     && pip install -r /opt/beholder_scanner/requirements.txt \
     && cp /opt/beholder_scanner/scanner/config.py.sample /opt/beholder_scanner/scanner/config.py \
-
     && curl -fL -o /tmp/nmap.tar.bz2 \
          https://nmap.org/dist/nmap-7.80.tar.bz2 \
     && tar -xjf /tmp/nmap.tar.bz2 -C /tmp \
@@ -23,10 +22,8 @@ RUN set -x \
     && ./configure \
     && make \
     && make install \
-
     && rm -rf /var/lib/apt/lists/* \
            /tmp/nmap*
 
 WORKDIR /opt/beholder_scanner
-ENTRYPOINT ["python","main.py"]
-CMD ["/usr/bin/tail", "-f", "/dev/null"]
+CMD ["/bin/bash","-c","set -e && python main.py"]
