@@ -1,8 +1,8 @@
 # coding=utf-8
 import os
 
-# 1是ping发现主机，0是通过发送tcp syn包到指定端口来发现主机
-FIND_HOST = os.environ.get("FIND_HOST", 1)
+# 1是ping发现主机。0是先通过发送tcp syn包到22和445端口来发现主机，可大幅提高速度
+FIND_HOST = int(os.environ.get("FIND_HOST", 1))
 # 扫描超时设置，单位秒
 SCAN_TIMEOUT=int(os.environ.get("SCAN_TIMEOUT", 300))
 
