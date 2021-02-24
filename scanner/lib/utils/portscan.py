@@ -234,7 +234,7 @@ class Nmap(nmap.PortScanner):
 
 
 if __name__ == "__main__":
-    port = "22"
+    port = "1-65535"
     nm = Nmap()
     x = nm.scan(hosts='127.0.0.1', ports=port,arguments='-sV -T4 --version-intensity 4', timeout=3)
     print nm.scan_result()
