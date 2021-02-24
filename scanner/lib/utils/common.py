@@ -57,10 +57,14 @@ def save_setting():
 def load_setting():
     setting_path = get_setting_path()
     if os.path.exists(setting_path):
-        with open(setting_path) as fp:
-            return str2dict(fp.read())
-    else:
 
+        with open(setting_path) as fp:
+            setting=fp.read()
+            if setting:
+                return str2dict(setting)
+            log.info("setting.json内容为空")
+            return {}
+    else:
         log.info("未找到setting.json")
         return {}
 
@@ -110,8 +114,8 @@ def str2dict(string):
         if type(string) == dict:
             return string
         return json.loads(string)
-    except TypeError as e:
-        log.exception("conv string failed : %s" % e)
+    except Exception as e:
+        log.exception("conv string failed : %s" % string)
 
 
 def dict2str(dictionary):
@@ -139,6 +143,7 @@ def run_nmap(scan_key, scan_data):
             nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=timeout)
 
         nmap_result_list = nm.scan_result()
+        log.debug(nmap_result_list)
         log.debug("pid=%s,nmap扫描结束:%s" % (os.getpid(), scan_data))
         if nmap_result_list:
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
@@ -645,4 +650,4 @@ def format_monitor_html(scan_time="", ips_count=0, ips=set()):
 
 
 if __name__ == '__main__':
-    task_process()
+    load_setting()
