@@ -151,7 +151,14 @@ class Nmap(nmap.PortScanner):
 
         return scan_result_list
 
+
+
+
     def scan(self, hosts='127.0.0.1', ports=None, arguments='-sV', sudo=False, timeout=60 * 5):
+        def kill(p):
+            p.kill()
+            print('scanning timeout:ip={0},port={1},arguments={2},timeout={3}'.format(hosts,ports,arguments,timeout))
+
         if sys.version_info[0] == 2:
             assert type(hosts) in (str, unicode), 'Wrong type for [hosts], should be a string [was {0}]'.format(
                 type(hosts))  # noqa
@@ -179,7 +186,7 @@ class Nmap(nmap.PortScanner):
         if sudo:
             args = ['sudo'] + args
 
-        kill = lambda process: process.kill()
+        # kill = lambda process: process.kill()
 
         p = subprocess.Popen(args, bufsize=100000,
                              stdin=subprocess.PIPE,
@@ -227,7 +234,7 @@ class Nmap(nmap.PortScanner):
 
 
 if __name__ == "__main__":
-    port = "1-65535"
+    port = "22"
     nm = Nmap()
-    x = nm.scan(hosts='192.168.47.144', arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=5)
+    x = nm.scan(hosts='127.0.0.1', ports=port,arguments='-sV -T4 --version-intensity 4', timeout=3)
     print nm.scan_result()

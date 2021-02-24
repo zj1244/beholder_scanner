@@ -131,7 +131,7 @@ def run_nmap(scan_key, scan_data):
         scan_data_dict = str2dict(scan_data)
         ip = scan_data_dict['ip']
         port = str(scan_data_dict['port'])
-        log.info("pid=%s,nmap开始扫描:%s" % (os.getpid(), scan_data))
+        log.debug("pid=%s,nmap开始扫描:%s" % (os.getpid(), scan_data))
         timeout = int(globals().get("SCAN_TIMEOUT", 300))
         if FIND_HOST:
             nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port, timeout=timeout)
@@ -139,7 +139,7 @@ def run_nmap(scan_key, scan_data):
             nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=timeout)
 
         nmap_result_list = nm.scan_result()
-
+        log.debug("pid=%s,nmap扫描结束:%s" % (os.getpid(), scan_data))
         if nmap_result_list:
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
             mongo_scan_result = mongo.conn[MONGO_DB_NAME][MONGO_RESULT_COLL_NAME]
@@ -167,7 +167,7 @@ def run_nmap(scan_key, scan_data):
 def task_process():
     while True:
         try:
-            check_heartbeat()
+
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
             mongo_task = mongo.conn[MONGO_DB_NAME][MONGO_TASKS_COLL_NAME]
             mongo_scan_result = mongo.conn[MONGO_DB_NAME][MONGO_RESULT_COLL_NAME]
@@ -645,4 +645,4 @@ def format_monitor_html(scan_time="", ips_count=0, ips=set()):
 
 
 if __name__ == '__main__':
-    print format_diff_html()
+    task_process()

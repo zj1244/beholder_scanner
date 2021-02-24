@@ -37,7 +37,7 @@ class ParentsProcess(multiprocessing.Process):
                 if len(ack_key):
                     timeout_data = redis.zrangebyscore(ack_key[0], "-INF", time() - timeout, 0, 1)
                     if timeout_data:
-                        log.debug("ack:%s" % timeout_data[0])
+                        log.info("ack:%s" % timeout_data[0])
                         redis.zrem(ack_key[0], timeout_data[0])
                         redis.put(ack_key[0].replace("ack_scan_", "scan_"), timeout_data[0])
                 scan_key = redis.get_key("scan_*")
@@ -45,10 +45,10 @@ class ParentsProcess(multiprocessing.Process):
                     scanning_num = load_setting().get("scanning_num", 5)
 
                     if len(multiprocessing.active_children()) < scanning_num:
-                        log.debug("【nmap】指定最大并发进程数%s，当前空闲进程数：%s，当前nmap待检测任务数：%s" % (
+                        log.info("【nmap】指定最大并发进程数%s，当前空闲进程数：%s，当前nmap待检测任务数：%s" % (
                             scanning_num, scanning_num - len(multiprocessing.active_children()),
                             redis.qsize(scan_key[0])))
-                        log.debug("子进程数目：%s" % len(multiprocessing.active_children()))
+                        log.info("子进程数目：%s" % len(multiprocessing.active_children()))
                         scan_data = redis.get(scan_key[0])
                         p = ChildProcess(scan_key[0], scan_data)
                         p.start()
