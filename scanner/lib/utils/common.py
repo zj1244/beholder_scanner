@@ -59,7 +59,7 @@ def load_setting():
     if os.path.exists(setting_path):
 
         with open(setting_path) as fp:
-            setting=fp.read()
+            setting = fp.read()
             if setting:
                 return str2dict(setting)
             log.info("setting.json内容为空")
@@ -143,7 +143,7 @@ def run_nmap(scan_key, scan_data):
             nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=timeout)
 
         nmap_result_list = nm.scan_result()
-        log.debug(nmap_result_list)
+        # log.debug(nmap_result_list)
         log.debug("pid=%s,nmap扫描结束:%s" % (os.getpid(), scan_data))
         if nmap_result_list:
             mongo = Mongodb(host=MONGO_IP, port=MONGO_PORT, username=MONGO_USER, password=MONGO_PWD)
@@ -191,7 +191,7 @@ def task_process():
 
             task_names = mongo_task.aggregate(
                 [{"$match": {"task_status": "finish",
-                             "$or": [{"diff_result": {"$exists": False}}, {"diff_result.diff": 0},
+                             "$or": [{"$and": [ {"diff_result.diff": 0}]},
                                      {"monitor_result.monitor": 0}]}},
                  {"$group": {"_id": "$name", "last_doc": {"$last": "$$ROOT"}}}])
 
@@ -219,7 +219,7 @@ def task_process():
                         "$set": {"monitor_result.monitor": 1, "monitor_result.ip_port": list(ip_port),
                                  }})
 
-                elif task_name["last_doc"]["task_type"] in [ "diff_task","loop"]:
+                elif task_name["last_doc"]["task_type"] in ["diff_task", "loop"]:
                     tasks = mongo_task.find(
                         {"name": task_name['_id'], "task_status": "finish"}
                     ).sort([('create_time', -1)]).limit(3)
@@ -650,4 +650,4 @@ def format_monitor_html(scan_time="", ips_count=0, ips=set()):
 
 
 if __name__ == '__main__':
-    load_setting()
+    task_process()
