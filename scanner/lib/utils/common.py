@@ -24,8 +24,9 @@ except ImportError:
 
 
 def check_heartbeat():
-    redis.hset(hash_name="beholder_node", key=get_node_ip(), value=time())
-    sleep(60 * 5)
+    while True:
+        redis.hset(hash_name="beholder_node", key=get_node_ip(), value=time())
+        sleep(60 * 5)
 
 
 def get_setting_path():
@@ -44,7 +45,7 @@ def save_setting():
             if result:
                 setting_path = get_setting_path()
 
-                for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender"]:
+                for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender", "send_type"]:
                     setting[key] = result.get(key, "")
 
                 with open(setting_path, "w+") as fp:
@@ -206,14 +207,17 @@ def task_process():
                         ip_port.add("%s:%s" % (result['ip'], result['port']))
 
                     if setting["mail_enable"] == "on":
-                        mail_contents = format_monitor_html(scan_time=date, ips_count=len(ip_port), ips=ip_port)
-                        if "," in setting["email_address"]:
-                            setting["email_address"] = setting["email_address"].split(",")
-                        send_mail(subject="【%s】【%s】监控端口开放结果" % (date, task_name['_id']), contents=mail_contents,
-                                  host=setting["email_server"],
-                                  use_ssl=True,
-                                  sender=setting["sender"], pwd=setting["email_pwd"],
-                                  email_address=setting["email_address"])
+                        if len(ip_port) or setting["send_type"]=="always":
+                            mail_contents = format_monitor_html(scan_time=date, ips_count=len(ip_port), ips=ip_port)
+                            if "," in setting["email_address"]:
+                                setting["email_address"] = setting["email_address"].split(",")
+                            send_mail(subject="【%s】【%s】监控端口开放结果" % (date, task_name['_id']), contents=mail_contents,
+                                      host=setting["email_server"],
+                                      use_ssl=True,
+                                      sender=setting["sender"], pwd=setting["email_pwd"],
+                                      email_address=setting["email_address"])
+                        else:
+                            log.info("端口开放数为零，不发送邮件")
 
                     mongo_task.update_one({"_id": task_name['last_doc']['_id']}, {
                         "$set": {"monitor_result.monitor": 1, "monitor_result.ip_port": list(ip_port),
@@ -259,16 +263,19 @@ def task_process():
                             "$set": {"diff_result.diff": 1}})
 
                         if setting["mail_enable"] == "on":
-                            contents = format_diff_html(scan_time=date, add_ips_count=len(add_ips),
-                                                        add_ports_count=len(add_ports), del_ips_count=len(del_ips),
-                                                        add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
-                            if "," in setting["email_address"]:
-                                setting["email_address"] = setting["email_address"].split(",")
-                            send_mail(subject="【%s】【%s】端口对比结果" % (date, task_name['_id']), contents=contents,
-                                      host=setting["email_server"],
-                                      use_ssl=True,
-                                      sender=setting["sender"], pwd=setting["email_pwd"],
-                                      email_address=setting["email_address"])
+                            if len(add_ports) or setting["send_type"]=="always":
+                                contents = format_diff_html(scan_time=date, add_ips_count=len(add_ips),
+                                                            add_ports_count=len(add_ports), del_ips_count=len(del_ips),
+                                                            add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
+                                if "," in setting["email_address"]:
+                                    setting["email_address"] = setting["email_address"].split(",")
+                                send_mail(subject="【%s】【%s】端口对比结果" % (date, task_name['_id']), contents=contents,
+                                          host=setting["email_server"],
+                                          use_ssl=True,
+                                          sender=setting["sender"], pwd=setting["email_pwd"],
+                                          email_address=setting["email_address"])
+                            else:
+                                log.info("无新增端口，不发送邮件")
 
                     else:
                         log.info("任务是第一次扫描")
