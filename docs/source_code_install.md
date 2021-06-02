@@ -28,7 +28,18 @@ mongodb和redis安装请参考：
 > exit
 ```
 
-#### 2. 导入数据库
+#### 2. 开启mongodb认证
+
+**在 mongodb 服务器上**编辑`/etc/mongod.conf`文件，添加如下内容，然后重启数据库：
+
+```
+# vim /etc/mongod.conf
+security:
+  authorization: enabled
+# systemctl restart mongod
+```
+
+#### 3. 导入数据库
 
 把beholder_scanner项目下的`db`文件夹导入 mongodb 。**在 mongodb 服务器上**执行如下命令：
 
@@ -38,7 +49,7 @@ mongodb和redis安装请参考：
 # mongorestore -u scan -p 123456 --authenticationDatabase admin -d portscan .
 ```
 
-#### 3. 安装python依赖库
+#### 4. 安装python依赖库
 
 ```
 # git clone https://github.com/zj1244/beholder_scanner.git
@@ -46,14 +57,14 @@ mongodb和redis安装请参考：
 # pip install -r requirements.txt
 ```
 
-#### 4. 安装nmap（如已安装跳过）
+#### 5. 安装nmap（如已安装跳过）
 
 ```
 # rpm -vhU https://nmap.org/dist/nmap-7.80-1.x86_64.rpm
 # nmap -V //输出nmap版本号为成功
 ```
 
-#### 5. 修改配置文件
+#### 6. 修改配置文件
 
 首先将`config.py.sample`复制一份重命名为`config.py`
 ```
@@ -92,7 +103,7 @@ MONGO_SETTING_COLL_NAME = "setting"
 
 ```
 
-#### 6. 启动
+#### 7. 启动
 
 在程序目录下执行如下命令：
 
