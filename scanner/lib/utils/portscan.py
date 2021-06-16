@@ -135,7 +135,8 @@ class Nmap(nmap.PortScanner):
                         result_dict = {}
                         result_dict['ip'] = k_ip
                         result_dict['port'] = k
-                        result_dict['service'] = v['name']
+
+                        result_dict['service'] ='http' if v['script']['http-check'].strip() else v['name']
                         # result_dict['status'] = 'open'
                         result_dict['version_info'] = "%s %s (%s)".strip() % (
                             v["product"], v["version"], v['extrainfo']) if v[
@@ -234,7 +235,7 @@ class Nmap(nmap.PortScanner):
 
 
 if __name__ == "__main__":
-    port = "1-65535"
+    port = "9090"
     nm = Nmap()
-    x = nm.scan(hosts='127.0.0.1', ports=port,arguments='-sV -T4 --version-intensity 4', timeout=3)
+    x = nm.scan(hosts='127.0.0.1', ports=port,arguments='-sV -T4 --version-intensity 4 --script=http-check', timeout=80)
     print nm.scan_result()

@@ -45,7 +45,8 @@ def save_setting():
             if result:
                 setting_path = get_setting_path()
 
-                for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender", "send_type"]:
+                for key in ["mail_enable", "scanning_num", "email_address", "email_pwd", "email_server", "sender",
+                            "send_type"]:
                     setting[key] = result.get(key, "")
 
                 with open(setting_path, "w+") as fp:
@@ -139,9 +140,11 @@ def run_nmap(scan_key, scan_data):
         log.debug("pid=%s,nmap开始扫描:%s" % (os.getpid(), scan_data))
         timeout = int(globals().get("SCAN_TIMEOUT", 300))
         if FIND_HOST:
-            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4' % port, timeout=timeout)
+            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4 --script=http-check' % port,
+                    timeout=timeout)
         else:
-            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4' % port, timeout=timeout)
+            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4 --script=http-check' % port,
+                    timeout=timeout)
 
         nmap_result_list = nm.scan_result()
         # log.debug(nmap_result_list)
@@ -192,7 +195,7 @@ def task_process():
 
             task_names = mongo_task.aggregate(
                 [{"$match": {"task_status": "finish",
-                             "$or": [{"$and": [ {"diff_result.diff": 0}]},
+                             "$or": [{"$and": [{"diff_result.diff": 0}]},
                                      {"monitor_result.monitor": 0}]}},
                  {"$group": {"_id": "$name", "last_doc": {"$last": "$$ROOT"}}}])
 
@@ -207,7 +210,7 @@ def task_process():
                         ip_port.add("%s:%s" % (result['ip'], result['port']))
 
                     if setting["mail_enable"] == "on":
-                        if len(ip_port) or setting["send_type"]=="always":
+                        if len(ip_port) or setting["send_type"] == "always":
                             mail_contents = format_monitor_html(scan_time=date, ips_count=len(ip_port), ips=ip_port)
                             if "," in setting["email_address"]:
                                 setting["email_address"] = setting["email_address"].split(",")
@@ -263,7 +266,7 @@ def task_process():
                             "$set": {"diff_result.diff": 1}})
 
                         if setting["mail_enable"] == "on":
-                            if len(add_ports) or setting["send_type"]=="always":
+                            if len(add_ports) or setting["send_type"] == "always":
                                 contents = format_diff_html(scan_time=date, add_ips_count=len(add_ips),
                                                             add_ports_count=len(add_ports), del_ips_count=len(del_ips),
                                                             add_ips=add_ips, add_ports=add_ports, del_ips=del_ips)
