@@ -13,7 +13,7 @@ RUN set -x \
 COPY . /opt/beholder_scanner
 
 RUN set -x \
-    && pip install -r /opt/beholder_scanner/requirements.txt \
+    && pip install -r /opt/beholder_scanner/requirements.txt -i https://pypi.python.org/simple \
     && cp /opt/beholder_scanner/scanner/config.py.sample /opt/beholder_scanner/scanner/config.py \
     && cp /opt/beholder_scanner/scanner/thirdparty/http-check.nse /usr/local/share/nmap/scripts/http-check.nse \
     && curl -fL -o /tmp/nmap.tar.bz2 \
