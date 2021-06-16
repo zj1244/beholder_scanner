@@ -15,7 +15,6 @@ COPY . /opt/beholder_scanner
 RUN set -x \
     && pip install --index-url https://pypi.tuna.tsinghua.edu.cn/simple -r /opt/beholder_scanner/requirements.txt \
     && cp /opt/beholder_scanner/scanner/config.py.sample /opt/beholder_scanner/scanner/config.py \
-    && cp /opt/beholder_scanner/scanner/thirdparty/http-check.nse /usr/local/share/nmap/scripts/http-check.nse \
     && curl -fL -o /tmp/nmap.tar.bz2 \
          https://nmap.org/dist/nmap-7.80.tar.bz2 \
     && tar -xjf /tmp/nmap.tar.bz2 -C /tmp \
@@ -23,6 +22,7 @@ RUN set -x \
     && ./configure \
     && make \
     && make install \
+    && cp /opt/beholder_scanner/scanner/thirdparty/http-check.nse /usr/local/share/nmap/scripts/http-check.nse \
     && rm -rf /var/lib/apt/lists/* \
            /tmp/nmap*
 
