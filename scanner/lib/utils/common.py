@@ -140,10 +140,12 @@ def run_nmap(scan_key, scan_data):
         log.debug("pid=%s,nmap开始扫描:%s" % (os.getpid(), scan_data))
         timeout = int(globals().get("SCAN_TIMEOUT", 300))
         if FIND_HOST:
-            nm.scan(hosts=ip, arguments='-sV -p%s -T4 --version-intensity 4 --script=http-check' % port,
+            nm.scan(hosts=ip,
+                    arguments='-sV -p%s -T4 --version-intensity 4 --script=scanner/thirdparty/http-check.nse' % port,
                     timeout=timeout)
         else:
-            nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4 --script=http-check' % port,
+            nm.scan(hosts=ip,
+                    arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4 --script=scanner/thirdparty/http-check.nse' % port,
                     timeout=timeout)
         nmap_result_list = nm.scan_result()
         # log.debug(nmap_result_list)

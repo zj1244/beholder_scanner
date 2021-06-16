@@ -22,7 +22,6 @@ RUN set -x \
     && ./configure \
     && make \
     && make install \
-    && cp /opt/beholder_scanner/scanner/thirdparty/http-check.nse /usr/local/share/nmap/scripts/http-check.nse \
     && rm -rf /var/lib/apt/lists/* \
            /tmp/nmap*
 

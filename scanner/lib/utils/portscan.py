@@ -237,5 +237,5 @@ class Nmap(nmap.PortScanner):
 if __name__ == "__main__":
     port = "9090"
     nm = Nmap()
-    x = nm.scan(hosts='127.0.0.1', ports=port,arguments='-sV -T4 --version-intensity 4 --script=http-check', timeout=80)
+    x = nm.scan(hosts='127.0.0.1', ports=port,arguments='-sV -T4 --version-intensity 4 --script=scanner/thirdparty/http-check.nse', timeout=80)
     print nm.scan_result()
