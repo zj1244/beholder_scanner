@@ -145,7 +145,6 @@ def run_nmap(scan_key, scan_data):
         else:
             nm.scan(hosts=ip, arguments='-sV -PS445,22 -p%s -T4 --version-intensity 4 --script=http-check' % port,
                     timeout=timeout)
-
         nmap_result_list = nm.scan_result()
         # log.debug(nmap_result_list)
         log.debug("pid=%s,nmap扫描结束:%s" % (os.getpid(), scan_data))
